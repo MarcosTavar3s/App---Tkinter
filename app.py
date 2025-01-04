@@ -1,4 +1,5 @@
 from tkinter import messagebox
+from tkinter import ttk
 import tkinter as tk
 import sqlite3
 import time
@@ -128,11 +129,26 @@ def tela_consulta():
     titulo = tk.Label(frame_atual, text="Consulta", font=("Roboto", 16, "bold"))
     titulo.pack(pady=0)
 
-    lista = tk.Listbox(frame_atual, height=10)
-    lista.pack(pady=5)
+    tabela = ttk.Treeview(frame_atual, columns=("Id_Cartao", "Nome", "Tempo_Partida", "Tempo_Chegada", "Tempo_Total"), show="headings")
+    tabela.pack(pady=10)
+
+    # Nome dos cabeçalhos
+    tabela.heading("Nome", text="Nome")
+    tabela.heading("Id_Cartao", text="Identificador")
+    tabela.heading("Tempo_Partida", text="Partida")
+    tabela.heading("Tempo_Chegada", text="Chegada")
+    tabela.heading("Tempo_Total", text="Tempo entre os pontos")
+
+    # Alinhamento das colunas    
+    tabela.column("Nome", anchor=tk.CENTER, width=200) 
+    tabela.column("Id_Cartao", anchor=tk.CENTER, width=85)  
+    tabela.column("Tempo_Partida", anchor=tk.CENTER, width=100)  
+    tabela.column("Tempo_Chegada", anchor=tk.CENTER, width=100)  
+    tabela.column("Tempo_Total", anchor=tk.CENTER, width=150)  
+
     
     for item in itens:
-        lista.insert(tk.END, item[2])
+        tabela.insert("", tk.END, values=item[1:])
 
     botao_voltar = tk.Button(frame_atual, text="Voltar para Janela 1", command=tela_inicial)
     botao_voltar.pack(pady=20)
