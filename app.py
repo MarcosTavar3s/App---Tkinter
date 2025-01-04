@@ -16,12 +16,30 @@ def cadastro_dados(nome, id):
         messagebox.showerror("Erro", "Todos os campos devem ser preenchidos!")
         return
 
+    cursor.execute('SELECT * FROM usuarios WHERE id_cartao = ?', (id))
+    if len(cursor.fetchall()):
+        messagebox.showwarning("Erro", "Identificador já cadastradado no banco de dados!")
+        return
+    
     # Conexao do banco de dados
     cursor.execute("INSERT INTO  usuarios (id_cartao, nome) VALUES (?,?)", (id, nome)) 
     
     banco.commit()
     messagebox.showinfo("Sucesso", "Dados inseridos com sucesso no banco!")
+ 
+def deleta_dados(id):
+    global frame_atual
+    global banco
+    global cursor
     
+    resposta = messagebox.askokcancel("Confirmação", "Deseja realmente deletar?")
+    
+    if resposta:
+        cursor.execute("DELETE FROM usuarios WHERE id = ?", (id,))
+        banco.commit()
+    else:
+        print("Não deletado")
+       
 def cronometro(event):
     print(event.widget.get())
     
@@ -32,7 +50,28 @@ def cronometro(event):
     
 def on_enter(event):
     cronometro(event)
+
+def consulta_geral():
+    global banco
+    global cursor
     
+    cursor.execute("SELECT * from usuarios")
+    itens = cursor.fetchall()
+
+    return itens
+
+def consulta_linha(event):
+    global frame_atual
+    
+    dados =  event.widget.item(event.widget.selection())['values']
+    id = dados[0]
+    
+    delete = lambda: deleta_dados(id)
+    
+    botao_delete = tk.Button(frame_atual, text="Deletar", command=delete)
+    botao_delete.pack(pady=10)
+    
+ 
 def limpa_frame():
     global frame_atual
     
@@ -120,15 +159,16 @@ def tela_consulta():
     global cursor
     limpa_frame()
     
-    cursor.execute("SELECT * from usuarios")
-    itens = cursor.fetchall()
+    itens = consulta_geral()
     
     frame_atual = tk.Frame(root)
     frame_atual.pack(expand=True)
     
+    # Título da página de consulta
     titulo = tk.Label(frame_atual, text="Consulta", font=("Roboto", 16, "bold"))
     titulo.pack(pady=0)
 
+    # Criação da tabela
     tabela = ttk.Treeview(frame_atual, columns=("Id_Cartao", "Nome", "Tempo_Partida", "Tempo_Chegada", "Tempo_Total"), show="headings")
     tabela.pack(pady=10)
 
@@ -146,10 +186,13 @@ def tela_consulta():
     tabela.column("Tempo_Chegada", anchor=tk.CENTER, width=100)  
     tabela.column("Tempo_Total", anchor=tk.CENTER, width=150)  
 
-    
+    # Insere itens na lista
     for item in itens:
         tabela.insert("", tk.END, values=item[1:])
-
+    
+    tabela.bind("<ButtonRelease-1>", consulta_linha)
+    
+    # Botão de voltar
     botao_voltar = tk.Button(frame_atual, text="Voltar para Janela 1", command=tela_inicial)
     botao_voltar.pack(pady=20)
     
