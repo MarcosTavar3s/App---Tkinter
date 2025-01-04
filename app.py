@@ -30,7 +30,7 @@ def tela_inicial():
 
 # Função para mudar para a Janela 2
 def tela_cadastro():
-    global frame_atual
+    global frame_atual    
     limpa_frame()
 
     # Cria o frame para a janela 2
@@ -54,7 +54,8 @@ def tela_cadastro():
     caixa_id.pack(pady=0)
         
    
-    envia_dados = lambda: cadastro_dados(nome=caixa_nome.get(), id=caixa_id.get())
+    envia_dados = lambda: [cadastro_dados(nome=caixa_nome.get(), id=caixa_id.get()), caixa_id.delete(0,tk.END), caixa_nome.delete(0,tk.END)]
+    
     
     botao_enviar = tk.Button(frame_atual, text="Enviar dados", command=envia_dados)
     botao_enviar.pack(pady=20)
@@ -89,7 +90,7 @@ def tela_consulta():
     botao_voltar = tk.Button(frame_atual, text="Voltar para Janela 1", command=tela_inicial)
     botao_voltar.pack(pady=20)
     
-def cadastro_dados(nome, id):
+def cadastro_dados(nome, id):    
     print(f"Nome: {nome}\nId:{id}")
     
 # Inicializa a janela principal (root)
