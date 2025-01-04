@@ -1,30 +1,36 @@
 from tkinter import messagebox
 import tkinter as tk
 import sqlite3
+import time
+
+banco = sqlite3.connect('meu_banco.db')
+cursor = banco.cursor()   
 
 def cadastro_dados(nome, id):
     global frame_atual
+    global banco
+    global cursor
     
     if not nome or not id:
         messagebox.showerror("Erro", "Todos os campos devem ser preenchidos!")
         return
 
     # Conexao do banco de dados
-    banco = sqlite3.connect('meu_banco.db')
-    
-    cursor = banco.cursor()   
     cursor.execute("INSERT INTO  usuarios (id_cartao, nome) VALUES (?,?)", (id, nome)) 
     
     banco.commit()
-    banco.close()
-
     messagebox.showinfo("Sucesso", "Dados inseridos com sucesso no banco!")
     
-def cronometro():
-    pass
+def cronometro(event):
+    print(event.widget.get())
+    
+    cursor.execute('UPDATE usuarios SET tempo_chegada = ? WHERE id = ?', (time.time(), event.widget.get()))
+    banco.commit()
+    
+    event.widget.delete(0, tk.END)
     
 def on_enter(event):
-    cronometro()
+    cronometro(event)
     
 def limpa_frame():
     global frame_atual
@@ -52,7 +58,6 @@ def tela_inicial():
     botao_tela_cadastro.pack(pady=5)
     botao_tela_corrida.pack(pady=5)
     botao_tela_consulta.pack(pady=5)
-
 
 # Função para mudar para a Janela 2
 def tela_cadastro():
@@ -88,7 +93,6 @@ def tela_cadastro():
     botao_voltar = tk.Button(frame_atual, text="Voltar para Janela 1", command=tela_inicial)
     botao_voltar.pack(pady=20)
 
-
 def tela_corrida():
     global frame_atual
     limpa_frame()
@@ -103,7 +107,7 @@ def tela_corrida():
     label_id.pack(pady=5)
     
     caixa_id = tk.Entry(frame_atual, font=("Roboto", 14))
-    caixa_id.bind("<Return>", on_enter)
+    caixa_id.bind("<Return>", cronometro)
     caixa_id.pack(pady=0)
 
     botao_voltar = tk.Button(frame_atual, text="Voltar para Janela 1", command=tela_inicial)
@@ -111,7 +115,12 @@ def tela_corrida():
 
 def tela_consulta():
     global frame_atual
+    global banco
+    global cursor
     limpa_frame()
+    
+    cursor.execute("SELECT * from usuarios")
+    itens = cursor.fetchall()
     
     frame_atual = tk.Frame(root)
     frame_atual.pack(expand=True)
@@ -119,10 +128,15 @@ def tela_consulta():
     titulo = tk.Label(frame_atual, text="Consulta", font=("Roboto", 16, "bold"))
     titulo.pack(pady=0)
 
+    lista = tk.Listbox(frame_atual, height=10)
+    lista.pack(pady=5)
+    
+    for item in itens:
+        lista.insert(tk.END, item[2])
+
     botao_voltar = tk.Button(frame_atual, text="Voltar para Janela 1", command=tela_inicial)
     botao_voltar.pack(pady=20)
     
-
     
 # Inicializa a janela principal (root)
 root = tk.Tk()
