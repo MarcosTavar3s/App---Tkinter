@@ -1,12 +1,38 @@
+from tkinter import messagebox
 import tkinter as tk
+import sqlite3
 
+def cadastro_dados(nome, id):
+    global frame_atual
+    
+    if not nome or not id:
+        messagebox.showerror("Erro", "Todos os campos devem ser preenchidos!")
+        return
+
+    # Conexao do banco de dados
+    banco = sqlite3.connect('meu_banco.db')
+    
+    cursor = banco.cursor()   
+    cursor.execute("INSERT INTO  usuarios (id_cartao, nome) VALUES (?,?)", (id, nome)) 
+    
+    banco.commit()
+    banco.close()
+
+    messagebox.showinfo("Sucesso", "Dados inseridos com sucesso no banco!")
+    
+def cronometro():
+    pass
+    
+def on_enter(event):
+    cronometro()
+    
 def limpa_frame():
     global frame_atual
     
     # Se houver um frame ativo, destrua-o
     if frame_atual:
         frame_atual.destroy()
-        
+      
 def tela_inicial():
     global frame_atual
     limpa_frame()
@@ -56,7 +82,6 @@ def tela_cadastro():
    
     envia_dados = lambda: [cadastro_dados(nome=caixa_nome.get(), id=caixa_id.get()), caixa_id.delete(0,tk.END), caixa_nome.delete(0,tk.END)]
     
-    
     botao_enviar = tk.Button(frame_atual, text="Enviar dados", command=envia_dados)
     botao_enviar.pack(pady=20)
     
@@ -74,6 +99,13 @@ def tela_corrida():
     titulo = tk.Label(frame_atual, text="Corrida", font=("Roboto", 16, "bold"))
     titulo.pack(pady=0)
 
+    label_id = tk.Label(frame_atual, text="Identificador do atleta:", font=("Roboto", 14))
+    label_id.pack(pady=5)
+    
+    caixa_id = tk.Entry(frame_atual, font=("Roboto", 14))
+    caixa_id.bind("<Return>", on_enter)
+    caixa_id.pack(pady=0)
+
     botao_voltar = tk.Button(frame_atual, text="Voltar para Janela 1", command=tela_inicial)
     botao_voltar.pack(pady=20)
 
@@ -90,8 +122,7 @@ def tela_consulta():
     botao_voltar = tk.Button(frame_atual, text="Voltar para Janela 1", command=tela_inicial)
     botao_voltar.pack(pady=20)
     
-def cadastro_dados(nome, id):    
-    print(f"Nome: {nome}\nId:{id}")
+
     
 # Inicializa a janela principal (root)
 root = tk.Tk()
